@@ -40,6 +40,19 @@ MIDDLEWARE = [
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.loca.lt",
+    "http://*.loca.lt",
+    "https://*.app.github.dev",
+    "https://*.onrender.com",
+    "https://*.railway.app",
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    "http://10.124.173.8:8000",
+]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 ROOT_URLCONF = "rxscan.urls"
 
 TEMPLATES = [
