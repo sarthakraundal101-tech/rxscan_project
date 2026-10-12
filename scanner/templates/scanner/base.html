@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0a3d2c">
 <meta name="description" content="AI-Assisted Prescription Scanner & Medicine Verification System">
 <link rel="manifest" href="{% static 'scanner/manifest.json' %}">
-<title>{% block title %}Prescription Scanner{% endblock %} | RxScan</title>
+<title>{% block title %}Prescription Scanner{% endblock %} | MediScan AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
@@ -17,7 +17,7 @@
 {% if user.is_authenticated %}
 <div class="mobile-topbar">
   <a class="brand" href="{% url 'home' %}" style="padding:0">
-    {% include 'scanner/_logo.html' %} <span>RxScan</span>
+    {% include 'scanner/_logo.html' %} <span>MediScan AI</span>
   </a>
   <div style="display:flex;align-items:center;gap:.5rem">
     <button class="theme-toggle-btn" type="button" aria-label="Toggle Dark Mode">🌙</button>
@@ -29,7 +29,7 @@
   <aside class="side">
     <a class="brand" href="{% url 'home' %}">
       {% include 'scanner/_logo.html' %}
-      <span>RxScan</span>
+      <span>MediScan AI</span>
       <span class="tag">AI+HITL</span>
     </a>
 

@@ -1,4 +1,4 @@
-# RxScan: AI-Based Prescription Scanner and Medicine Information System
+# MediScan AI: AI-Based Prescription Scanner and Medicine Verification System
 
 A Django web application that scans a prescription image, extracts the medicines with OCR,
 matches them to a medicine database, shows verified reference information, and sends uncertain

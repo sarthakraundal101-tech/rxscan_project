@@ -1,5 +1,5 @@
-// RxScan Progressive Web App Service Worker
-const CACHE_NAME = "rxscan-v2.0";
+// MediScan AI Progressive Web App Service Worker
+const CACHE_NAME = "mediscan-ai-v2.0";
 const ASSETS_TO_CACHE = [
   "/static/scanner/css/style.css",
   "/static/scanner/js/app.js",

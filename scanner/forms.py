@@ -50,7 +50,7 @@ def _generate_prescription_graphic(text):
 
     # Footer
     draw.line([(32, height - 70), (width - 32, height - 70)], fill=(225, 235, 229), width=1)
-    draw.text((50, height - 52), "Digitally Generated Prescription Sheet - RxScan Engine", fill=(121, 144, 132))
+    draw.text((50, height - 52), "Digitally Generated Prescription Sheet - MediScan AI Engine", fill=(121, 144, 132))
 
     buf = io.BytesIO()
     img.save(buf, format="PNG")

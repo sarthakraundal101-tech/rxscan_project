@@ -1,6 +1,6 @@
 {
-  "name": "RxScan - Clinical Prescription Scanner",
-  "short_name": "RxScan",
+  "name": "MediScan AI - Clinical Prescription Scanner",
+  "short_name": "MediScan AI",
   "description": "AI-assisted prescription scanner and medicine verification system.",
   "start_url": "/dashboard/",
   "display": "standalone",
