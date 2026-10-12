@@ -1,0 +1,14 @@
+{
+  "name": "RxScan Codespace",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": {
+      "label": "RxScan Server & API",
+      "onAutoForward": "openBrowser",
+      "visibility": "public"
+    }
+  },
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-eng libgl1 libglib2.0-0 && pip install -r requirements.txt gunicorn whitenoise && python manage.py migrate && python manage.py seed_medicines",
+  "postStartCommand": "python manage.py runserver 0.0.0.0:8000"
+}
