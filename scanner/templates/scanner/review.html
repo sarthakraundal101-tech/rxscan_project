@@ -1,0 +1,119 @@
+{% extends 'scanner/base.html' %}
+{% load static %}
+{% block title %}Edit & Confirm Prescription #{{ rx.code }}{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1>Edit & Confirm Prescription <span class="muted">#{{ rx.code }}</span></h1>
+    <p class="muted">Compare the prescription image against AI extractions, make any corrections, and save your confirmed list.</p>
+  </div>
+  <span class="badge st-{{ rx.status }}" style="font-size:.9rem;padding:.35rem .85rem">{{ rx.get_status_display }}</span>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="split">
+    <!-- Image Workbench -->
+    <div class="card" style="position:sticky;top:1rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <h2 style="margin:0">Original Prescription</h2>
+        <span class="badge b-high">OCR {{ rx.ocr_confidence|floatformat:0 }}%</span>
+      </div>
+
+      <div class="viewer-toolbar">
+        <button class="tool-btn" id="btn-zoom-in" type="button" title="Zoom In">🔍 +</button>
+        <button class="tool-btn" id="btn-zoom-out" type="button" title="Zoom Out">🔍 -</button>
+        <button class="tool-btn" id="btn-rotate-left" type="button" title="Rotate Left">↺</button>
+        <button class="tool-btn" id="btn-rotate-right" type="button" title="Rotate Right">↻</button>
+        <button class="tool-btn" id="btn-invert" type="button" title="Toggle High Contrast">🌓 Invert</button>
+        <button class="tool-btn" id="btn-reset" type="button" title="Reset View">Reset</button>
+      </div>
+
+      <div class="viewer-canvas-wrap">
+        {% if rx.display_url %}
+          <img id="inspect-img" src="{{ rx.display_url }}" alt="Prescription image">
+        {% else %}
+          <p class="muted" style="padding:2rem">PDF Document: {{ rx.filename }}</p>
+        {% endif %}
+      </div>
+
+      <details style="margin-top:.75rem">
+        <summary>OCR Raw Text</summary>
+        <pre class="ocr">{{ rx.ocr_text }}</pre>
+      </details>
+
+      {% if rx.conditions or rx.allergies %}
+        <div style="margin-top:.75rem;padding:.75rem;background:var(--surface-subtle);border-radius:var(--radius-sm)">
+          <div class="small"><b>Reported Conditions:</b> {{ rx.conditions|default:"None entered" }}</div>
+          <div class="small" style="margin-top:.25rem"><b>Reported Allergies:</b> {{ rx.allergies|default:"None entered" }}</div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Review Editing Column -->
+    <div>
+      {% include 'scanner/_safety.html' %}
+
+      <h2 style="margin:1.5rem 0 .75rem">Medication Verification & Dosage Confirmation</h2>
+
+      {% for it in items %}
+      <article class="med">
+        <header>
+          <div><b>OCR Extracted Token:</b> <code style="background:var(--surface-subtle);padding:.2rem .4rem;border-radius:4px">"{{ it.detected_text }}"</code></div>
+          <span class="badge b-{{ it.band }}">{{ it.band_label }}</span>
+        </header>
+
+        {% include 'scanner/_conf.html' with value=it.confidence band=it.band %}
+
+        {% if it.note %}
+          <div class="notice warn small" style="margin-top:.6rem">{{ it.note }}</div>
+        {% endif %}
+
+        <div style="margin-top:.85rem">
+          <label for="med_{{ it.id }}" style="margin-top:0">Matched Generic Medication</label>
+          <select id="med_{{ it.id }}" name="med_{{ it.id }}">
+            <option value="">⛔ Not a medication / Reject candidate</option>
+            {% for m in all_medicines %}
+              <option value="{{ m.pk }}" {% if it.medicine_id == m.pk %}selected{% endif %}>{{ m.generic_name }} ({{ m.therapeutic_class }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="formgrid" style="margin-top:.6rem">
+          <div>
+            <label for="s{{ it.id }}" style="margin-top:0">Strength</label>
+            <input type="text" id="s{{ it.id }}" name="strength_{{ it.id }}" value="{{ it.strength }}" placeholder="e.g. 500 mg">
+          </div>
+          <div>
+            <label for="f{{ it.id }}" style="margin-top:0">Frequency</label>
+            <input type="text" id="f{{ it.id }}" name="frequency_{{ it.id }}" value="{{ it.frequency }}" placeholder="e.g. 1-0-1 or BD">
+          </div>
+          <div>
+            <label for="d{{ it.id }}" style="margin-top:0">Duration</label>
+            <input type="text" id="d{{ it.id }}" name="duration_{{ it.id }}" value="{{ it.duration }}" placeholder="e.g. 5 days">
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+
+      <div class="card" style="margin-top:1.5rem">
+        <h3 style="margin:0 0 .5rem">Confirmation & Notes</h3>
+        <label for="remarks" style="margin-top:.25rem">Personal Notes or Dosage Advice (Optional)</label>
+        <textarea id="remarks" name="remarks" rows="3" placeholder="Add personal notes regarding food timing, special instructions, or doctor advice..."></textarea>
+        
+        <div style="margin-top:1.25rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+          <button class="btn" type="submit" style="padding:.8rem 1.6rem">
+            <span>💾</span> Save & Confirm Prescription
+          </button>
+          <a class="btn ghost sm" href="{% url 'result' rx.pk %}">Cancel</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'scanner/js/viewer.js' %}"></script>
+{% endblock %}

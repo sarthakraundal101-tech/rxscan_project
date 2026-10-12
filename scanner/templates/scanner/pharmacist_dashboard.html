@@ -1,0 +1,67 @@
+{% extends 'scanner/base.html' %}
+{% block title %}Pharmacist Clinical Queue{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1>Pharmacist Clinical Queue</h1>
+    <p class="muted">Human-in-the-Loop review workspace. Inspect OCR detections against physician prescriptions and confirm therapy.</p>
+  </div>
+  <a class="btn ghost sm" href="{% url 'medicines' %}">Browse Medicine Formulary</a>
+</div>
+
+<div class="grid g4" style="margin-bottom:2rem">
+  <div class="stat warn">
+    <b>{{ pending }}</b>
+    <span>Pending Review</span>
+  </div>
+  <div class="stat">
+    <b>{{ verified }}</b>
+    <span>Verified Today</span>
+  </div>
+  <div class="stat danger">
+    <b>{{ low }}</b>
+    <span>Low-Confidence Flags</span>
+  </div>
+  <div class="stat info">
+    <b>{{ queue|length }}</b>
+    <span>Total in Queue</span>
+  </div>
+</div>
+
+<div class="card flat">
+  <div style="padding:1.4rem 1.6rem .4rem">
+    <h2 style="margin:0">Active Clinical Review Queue</h2>
+  </div>
+  {% if queue %}
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Patient Name</th>
+          <th>Uploaded Timestamp</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in queue %}
+        <tr>
+          <td><b>{{ s.code }}</b></td>
+          <td>{{ s.user.first_name|default:s.user.username }}</td>
+          <td class="muted">{{ s.uploaded_at|date:"d M Y, H:i" }}</td>
+          <td><span class="badge st-{{ s.status }}">{{ s.get_status_display }}</span></td>
+          <td><a class="btn sm" href="{% url 'review' s.pk %}"><span>🔍</span> Start Review</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p style="padding:2rem 1.6rem" class="muted">
+      🎉 The verification queue is currently clear. Incoming patient uploads requiring human verification will appear here automatically.
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

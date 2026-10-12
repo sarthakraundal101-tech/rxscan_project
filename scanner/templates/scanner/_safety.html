@@ -1,0 +1,48 @@
+{% if safety.interactions %}
+<div class="card" style="border-left:4px solid var(--red)">
+  <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem">
+    <span style="font-size:1.2rem">🚨</span>
+    <h2 style="margin:0;color:var(--red)">Potential Drug-Drug Interactions Detected</h2>
+  </div>
+  {% for i in safety.interactions %}
+  <div class="notice {% if i.severity == 'major' %}bad{% else %}warn{% endif %}">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
+      <b>{{ i.medicine_a.generic_name }} + {{ i.medicine_b.generic_name }}</b>
+      <span class="badge sev-{{ i.severity }}">{{ i.get_severity_display }} Risk</span>
+    </div>
+    <p style="margin:.4rem 0 0;font-size:.92rem">{{ i.description }} Requires physician or pharmacist review before concurrent administration.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if safety.patient_warnings or safety.duplicates %}
+<div class="card" style="border-left:4px solid var(--amber)">
+  <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem">
+    <span style="font-size:1.2rem">⚠️</span>
+    <h2 style="margin:0;color:var(--amber)">Clinical Safety Alerts</h2>
+  </div>
+  {% if safety.patient_warnings %}
+    <div class="notice warn">
+      <b>Contraindication & Allergy Screening:</b>
+      <ul style="margin-top:.4rem">
+        {% for name, text in safety.patient_warnings %}
+          <li><b>{{ name }}:</b> {{ text }}</li>
+        {% endfor %}
+      </ul>
+      <p class="small muted" style="margin:.5rem 0 0">Cross-referenced against entered conditions and drug allergy profiles.</p>
+    </div>
+  {% endif %}
+  {% if safety.duplicates %}
+    <div class="notice warn">
+      <b>Therapeutic Duplication Alert:</b>
+      <ul style="margin-top:.4rem">
+        {% for d in safety.duplicates %}
+          <li>{{ d }}</li>
+        {% endfor %}
+      </ul>
+      <p class="small muted" style="margin:.5rem 0 0">Multiple agents from the same therapeutic category may cause compounded adverse effects.</p>
+    </div>
+  {% endif %}
+</div>
+{% endif %}

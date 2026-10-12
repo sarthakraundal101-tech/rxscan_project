@@ -1,0 +1,168 @@
+{% extends 'scanner/base.html' %}
+{% load static %}
+{% block title %}Prescription {{ rx.code }}{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1>Prescription Analysis <span class="muted" style="font-weight:500">#{{ rx.code }}</span></h1>
+    <p class="muted">Uploaded on {{ rx.uploaded_at|date:"d M Y, H:i" }} &bull; File: {{ rx.filename }}</p>
+  </div>
+  <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+    <button class="btn ghost sm" type="button" onclick="window.print()">🖨️ Export Safety Sheet</button>
+    <span class="badge st-{{ rx.status }}" style="font-size:.9rem;padding:.35rem .85rem">{{ rx.get_status_display }}</span>
+  </div>
+</div>
+
+{% if rx.status == 'unreadable' %}
+  <div class="notice bad">
+    <b style="font-size:1.05rem">Image Analysis Inconclusive</b>
+    <p style="margin:.4rem 0 0">{{ rx.status_note }}</p>
+  </div>
+  <a class="btn" href="{% url 'upload' %}">Upload a Clearer Image or Type Manually</a>
+{% else %}
+<div class="split">
+  <!-- Original Prescription with Viewer Controls -->
+  <div class="card" style="position:sticky;top:1rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+      <h2 style="margin:0">Prescription View</h2>
+      <span class="badge b-high">OCR {{ rx.ocr_confidence|floatformat:0 }}% Conf</span>
+    </div>
+
+    <div class="viewer-toolbar">
+      <button class="tool-btn" id="btn-zoom-in" type="button" title="Zoom In">🔍 +</button>
+      <button class="tool-btn" id="btn-zoom-out" type="button" title="Zoom Out">🔍 -</button>
+      <button class="tool-btn" id="btn-rotate-left" type="button" title="Rotate Left">↺</button>
+      <button class="tool-btn" id="btn-rotate-right" type="button" title="Rotate Right">↻</button>
+      <button class="tool-btn" id="btn-invert" type="button" title="Toggle Contrast">🌓 Invert</button>
+      <button class="tool-btn" id="btn-reset" type="button" title="Reset View">Reset</button>
+    </div>
+
+    <div class="viewer-canvas-wrap">
+      {% if rx.display_url %}
+        <img id="inspect-img" src="{{ rx.display_url }}" alt="Uploaded prescription document">
+      {% else %}
+        <p class="muted" style="padding:2rem">PDF Document: {{ rx.filename }}</p>
+      {% endif %}
+    </div>
+
+    <p class="small muted" style="margin-top:.75rem">
+      Image Quality: {{ rx.quality_notes|default:"Satisfactory resolution" }}
+    </p>
+
+    <details style="margin-top:.75rem">
+      <summary>Raw OCR Extracted Text</summary>
+      <pre class="ocr">{{ rx.ocr_text }}</pre>
+    </details>
+
+    {% if rx.age_group %}
+      <p class="small muted" style="margin-top:.5rem"><b>Age Category:</b> {{ rx.get_age_group_display }}</p>
+    {% endif %}
+  </div>
+
+  <!-- Clinical & AI Analysis -->
+  <div>
+    {% if rx.status == 'verified' %}
+      <div class="notice info" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem">
+        <div>
+          <b>✅ Verified & Confirmed Prescription</b>
+          {% if last_verification %}
+            <p class="small" style="margin:.25rem 0 0">
+              Confirmed on {{ last_verification.verified_at|date:"d M Y, H:i" }}
+              {% if last_verification.remarks %}&bull; Notes: <i>"{{ last_verification.remarks }}"</i>{% endif %}
+            </p>
+          {% endif %}
+        </div>
+        <a class="btn sm ghost" href="{% url 'review' rx.pk %}">✏️ Edit Medicines</a>
+      </div>
+    {% else %}
+      <div class="notice info" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem">
+        <div>
+          <b>⚡ AI Analysis Complete</b>
+          <p class="small" style="margin:.25rem 0 0">Medicines and dosages were extracted automatically. You can review, adjust, and confirm the details.</p>
+        </div>
+        <a class="btn sm" href="{% url 'review' rx.pk %}">✏️ Edit & Confirm Medicines</a>
+      </div>
+    {% endif %}
+
+    {% include 'scanner/_safety.html' %}
+
+    <h2 style="margin:1.75rem 0 1rem">Detected Medications ({{ items|length }})</h2>
+
+    {% for it in items %}
+    <article class="med">
+      <header>
+        <div>
+          <h3 style="margin:0;font-size:1.25rem">
+            {% if it.medicine %}
+              <a href="{% url 'medicine_detail' it.medicine.pk %}">{{ it.medicine.generic_name }}</a>
+            {% else %}
+              Unidentified Token: "{{ it.detected_text }}"
+            {% endif %}
+          </h3>
+          {% if it.medicine %}
+            <span class="muted small">
+              {{ it.medicine.therapeutic_class }}
+              {% if it.detected_text|lower != it.medicine.generic_name|lower %}
+                &bull; Read as "{{ it.detected_text }}"
+              {% endif %}
+            </span>
+          {% endif %}
+        </div>
+        <span class="badge b-{{ it.band }}">{{ it.band_label }}</span>
+      </header>
+
+      {% include 'scanner/_conf.html' with value=it.confidence band=it.band %}
+
+      <div class="meta">
+        <div><small>Strength</small><b>{{ it.strength|default:"Not specified" }}</b></div>
+        <div><small>Frequency</small><b>{{ it.frequency|default:"Not specified" }}</b></div>
+        <div><small>Duration</small><b>{{ it.duration|default:"Not specified" }}</b></div>
+      </div>
+
+      {% if it.note %}
+        <div class="notice warn small">{{ it.note }}</div>
+      {% endif %}
+
+      {% if it.band != 'high' and it.band != 'verified' and it.alternatives %}
+        <p class="small muted">
+          <b>Alternative Formulary Matches:</b>
+          {% for a in it.alternatives %}
+            <span>{{ a.name }} ({{ a.score|floatformat:0 }}%)</span>{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </p>
+      {% endif %}
+
+      {% if it.medicine %}
+      <div class="cols" style="margin-top:1rem">
+        <div>
+          <h3>Common Indications</h3>
+          <ul>{% for x in it.medicine.uses_list|slice:":3" %}<li>{{ x }}</li>{% endfor %}</ul>
+        </div>
+        <div>
+          <h3>Documented Side Effects</h3>
+          <ul>{% for x in it.medicine.side_effects_list|slice:":3" %}<li>{{ x }}</li>{% endfor %}</ul>
+        </div>
+        <div>
+          <h3>Contraindications</h3>
+          <ul>{% for x in it.medicine.contraindications_list|slice:":2" %}<li>{{ x }}</li>{% endfor %}</ul>
+        </div>
+      </div>
+      <p style="margin-top:1rem" class="small">
+        <a href="{% url 'medicine_detail' it.medicine.pk %}">View Full Clinical Monograph & Age Guidelines &rarr;</a>
+      </p>
+      {% endif %}
+    </article>
+    {% endfor %}
+
+    <div class="disclaimer">
+      <b>Clinical Notice:</b> RxScan is an educational and verification tool. It extracts text and cross-references pharmacopeial data but does not prescribe or alter physician instructions. Always consult a licensed healthcare professional.
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'scanner/js/viewer.js' %}"></script>
+{% endblock %}

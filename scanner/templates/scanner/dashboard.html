@@ -1,0 +1,45 @@
+{% extends 'scanner/base.html' %}
+{% block title %}Patient Dashboard{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1>Welcome, {{ user.first_name|default:user.username }}</h1>
+    <p class="muted">Monitor your digital prescription history and verified medication insights.</p>
+  </div>
+  <a class="btn" href="{% url 'upload' %}">
+    <span>📷</span> Scan New Prescription
+  </a>
+</div>
+
+<div class="grid g4" style="margin-bottom:2rem">
+  <div class="stat info">
+    <b>{{ total }}</b>
+    <span>Total Prescriptions</span>
+  </div>
+  <div class="stat">
+    <b>{{ verified }}</b>
+    <span>Pharmacist Verified</span>
+  </div>
+  <div class="stat warn">
+    <b>{{ pending }}</b>
+    <span>Awaiting Review</span>
+  </div>
+  <div class="stat danger">
+    <b>{{ unreadable }}</b>
+    <span>Requires Rescan</span>
+  </div>
+</div>
+
+<div class="card flat">
+  <div style="padding:1.4rem 1.6rem .4rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
+    <h2 style="margin:0">Recent Prescription Scans</h2>
+    <a href="{% url 'history' %}" class="small" style="font-weight:600">View All History &rarr;</a>
+  </div>
+  {% include 'scanner/_scan_table.html' %}
+</div>
+
+<div class="disclaimer">
+  <b>Important Safety Reminder:</b> Information shown in this system is for verification and reference only. Never alter your dosage without consulting your prescribing physician or a certified clinical pharmacist.
+</div>
+{% endblock %}

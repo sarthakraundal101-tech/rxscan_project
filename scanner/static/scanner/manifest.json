@@ -1,0 +1,24 @@
+{
+  "name": "RxScan - Clinical Prescription Scanner",
+  "short_name": "RxScan",
+  "description": "AI-assisted prescription scanner and medicine verification system.",
+  "start_url": "/dashboard/",
+  "display": "standalone",
+  "background_color": "#06281c",
+  "theme_color": "#0a3d2c",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/scanner/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/scanner/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

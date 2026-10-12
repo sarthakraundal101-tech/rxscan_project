@@ -1,0 +1,55 @@
+{% extends 'scanner/base.html' %}
+{% block title %}Medicine Database Formulary{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1>Medicine Database Formulary</h1>
+    <p class="muted">{{ medicines|length }} reference medication{{ medicines|length|pluralize }} cataloged with clinical guidelines, precautions, and interactions.</p>
+  </div>
+  <form method="get" style="min-width:300px">
+    <input type="search" id="live-med-search" name="q" value="{{ q }}" placeholder="🔍 Quick search generic, brand, or class..." aria-label="Search medicines">
+  </form>
+</div>
+
+<div class="card flat">
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Generic Name</th>
+          <th>Brand Names</th>
+          <th>Therapeutic Class</th>
+          <th>Available Strengths</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in medicines %}
+        <tr class="med-table-row">
+          <td><code>{{ m.code }}</code></td>
+          <td>
+            <a href="{% url 'medicine_detail' m.pk %}">
+              <b style="font-size:1.02rem">{{ m.generic_name }}</b>
+            </a>
+          </td>
+          <td>{{ m.brand_names }}</td>
+          <td><span class="badge" style="background:var(--surface-subtle);color:var(--text-main)">{{ m.therapeutic_class }}</span></td>
+          <td class="muted">{{ m.strengths }}</td>
+          <td>
+            <a class="btn ghost sm" href="{% url 'medicine_detail' m.pk %}">Details &rarr;</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="muted" style="padding:2rem;text-align:center">
+            No medicines found matching "{{ q }}". Try searching by generic name (e.g. Paracetamol, Metformin).
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

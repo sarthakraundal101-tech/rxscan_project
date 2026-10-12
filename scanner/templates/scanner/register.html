@@ -1,0 +1,30 @@
+{% extends 'scanner/base.html' %}
+{% block title %}Create Account{% endblock %}
+{% block auth %}
+<div class="auth">
+  {% include 'scanner/_auth_hero.html' %}
+  <section class="panel">
+    <div>
+      <h1 style="font-size:2rem;margin-bottom:.3rem">Create Account</h1>
+      <p class="muted">Register as a patient to start scanning prescriptions and tracking medications.</p>
+      
+      <form method="post" novalidate style="margin-top:1.5rem">
+        {% csrf_token %}
+        {% for f in form %}
+          <label for="{{ f.id_for_label }}">{{ f.label }}</label>
+          {{ f }}
+          {{ f.errors }}
+          {% if f.help_text %}
+            <span class="help">{{ f.help_text|safe }}</span>
+          {% endif %}
+        {% endfor %}
+        <button class="btn" type="submit" style="margin-top:1.5rem">Create Account &rarr;</button>
+      </form>
+      
+      <p class="small muted" style="margin-top:1.5rem;text-align:center">
+        Already registered? <a href="{% url 'login' %}" style="font-weight:600">Sign in here</a>
+      </p>
+    </div>
+  </section>
+</div>
+{% endblock %}

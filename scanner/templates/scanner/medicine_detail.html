@@ -1,0 +1,81 @@
+{% extends 'scanner/base.html' %}
+{% load static %}
+{% block title %}{{ m.generic_name }} Monograph{% endblock %}
+
+{% block content %}
+<p class="small" style="margin-bottom:1rem">
+  <a href="{% url 'medicines' %}">&larr; Back to Medicine Database</a>
+</p>
+
+<div class="pagehead">
+  <div>
+    <h1>{{ m.generic_name }}</h1>
+    <p class="muted">{{ m.therapeutic_class }} &bull; Formulary Code: <b>{{ m.code }}</b></p>
+  </div>
+  <span class="badge b-high" style="font-size:.9rem;padding:.35rem .85rem">Verified Monograph</span>
+</div>
+
+<!-- Clinical Monograph Quick Overview Card -->
+<div class="card" style="background:var(--surface-card);border:1px solid var(--border-light)">
+  <h2 style="margin:0 0 .75rem">Clinical Overview</h2>
+  <div class="formgrid">
+    <div>
+      <small class="muted" style="text-transform:uppercase;font-weight:600">Therapeutic Class</small>
+      <p style="font-size:1.05rem;font-weight:600;margin-top:.25rem">{{ m.therapeutic_class }}</p>
+    </div>
+    <div>
+      <small class="muted" style="text-transform:uppercase;font-weight:600">Available Strengths</small>
+      <p style="font-size:1.05rem;font-weight:600;margin-top:.25rem">{{ m.strengths|default:"Standard formulation" }}</p>
+    </div>
+    <div>
+      <small class="muted" style="text-transform:uppercase;font-weight:600">Common Brand Names</small>
+      <p style="font-size:1.05rem;font-weight:600;margin-top:.25rem">{{ m.brand_names|default:"Generic only" }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="grid g2">
+  <div class="card">
+    <h2 style="color:var(--primary-500)">Common Clinical Uses</h2>
+    <ul>{% for x in m.uses_list %}<li>{{ x }}</li>{% endfor %}</ul>
+  </div>
+  <div class="card">
+    <h2 style="color:#d97706">Possible Side Effects</h2>
+    <ul>{% for x in m.side_effects_list %}<li>{{ x }}</li>{% endfor %}</ul>
+  </div>
+  <div class="card">
+    <h2 style="color:var(--red)">Contraindications</h2>
+    <ul>{% for x in m.contraindications_list %}<li>{{ x }}</li>{% endfor %}</ul>
+  </div>
+  <div class="card">
+    <h2 style="color:var(--accent-cyan)">Clinical Precautions</h2>
+    <ul>
+      {% for x in m.precautions_list %}
+        <li>{{ x }}</li>
+      {% empty %}
+        <li class="muted">No special precautions cataloged.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Age-Group Reference Information</h2>
+  <div class="notice warn small" style="margin-top:.5rem">
+    Reference guideline only. Pediatric and geriatric dosing must be evaluated by a physician based on body weight, renal clearance, and formulation.
+  </div>
+  {% for label, text in m.age_groups %}
+    <details {% if forloop.first %}open{% endif %} style="margin-top:.35rem">
+      <summary style="font-size:1.05rem">{{ label }} Guidelines</summary>
+      <p style="margin-top:.5rem">{{ text }}</p>
+    </details>
+  {% endfor %}
+</div>
+
+<p class="small muted" style="margin-top:1.5rem">
+  Source: {{ m.source }}. Last update: {{ m.last_updated|date:"d M Y" }}.
+</p>
+<div class="disclaimer">
+  Information is provided for educational and clinical verification. Never self-medicate or alter a prescribed regimen without physician supervision.
+</div>
+{% endblock %}

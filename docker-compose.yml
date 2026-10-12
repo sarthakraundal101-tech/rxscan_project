@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py seed_medicines &&
+             gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 rxscan.wsgi:application"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./media:/app/media
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=production-secure-key-rxscan-diploma
+      - ALLOWED_HOSTS=*
+      - TESSERACT_CMD=/usr/bin/tesseract
+    restart: unless-stopped

@@ -1,0 +1,18 @@
+{% extends 'scanner/base.html' %}
+{% block title %}Previous Scans & History{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1>Prescription History</h1>
+    <p class="muted">Review all your processed prescriptions, extracted regimens, and pharmacist verification audit trails.</p>
+  </div>
+  <a class="btn" href="{% url 'upload' %}">
+    <span>📷</span> Scan New Prescription
+  </a>
+</div>
+
+<div class="card flat">
+  {% include 'scanner/_scan_table.html' %}
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% if scans %}
+<div class="tablewrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Rx Code</th>
+        <th>Uploaded Date</th>
+        <th>Original File</th>
+        <th>Verification Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in scans %}
+      <tr>
+        <td><code>{{ s.code }}</code></td>
+        <td class="muted">{{ s.uploaded_at|date:"d M Y, H:i" }}</td>
+        <td>{{ s.filename|truncatechars:32 }}</td>
+        <td><span class="badge st-{{ s.status }}">{{ s.get_status_display }}</span></td>
+        <td>
+          <a class="btn sm ghost" href="{% url 'result' s.pk %}">View Analysis &rarr;</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+  <p style="padding:2rem 1.6rem;text-align:center" class="muted">
+    No prescription scans found yet. <a href="{% url 'upload' %}" style="font-weight:600">Scan your first prescription &rarr;</a>
+  </p>
+{% endif %}

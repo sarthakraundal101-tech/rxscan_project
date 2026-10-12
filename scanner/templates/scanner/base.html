@@ -1,0 +1,82 @@
+{% load static %}<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a3d2c">
+<meta name="description" content="AI-Assisted Prescription Scanner & Medicine Verification System">
+<link rel="manifest" href="{% static 'scanner/manifest.json' %}">
+<title>{% block title %}Prescription Scanner{% endblock %} | RxScan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="{% static 'scanner/css/style.css' %}">
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="mobile-topbar">
+  <a class="brand" href="{% url 'home' %}" style="padding:0">
+    {% include 'scanner/_logo.html' %} <span>RxScan</span>
+  </a>
+  <div style="display:flex;align-items:center;gap:.5rem">
+    <button class="theme-toggle-btn" type="button" aria-label="Toggle Dark Mode">🌙</button>
+    <button class="mobile-menu-btn" id="mobile-menu-toggle" type="button" aria-label="Toggle navigation">☰</button>
+  </div>
+</div>
+
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="{% url 'home' %}">
+      {% include 'scanner/_logo.html' %}
+      <span>RxScan</span>
+      <span class="tag">AI+HITL</span>
+    </a>
+
+    <div class="side-nav-group">
+      <span class="side-label">Navigation</span>
+      <a class="nav {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+        <span>📊</span> Dashboard
+      </a>
+      <a class="nav {% if request.resolver_match.url_name == 'upload' %}active{% endif %}" href="{% url 'upload' %}">
+        <span>📷</span> Scan Prescription
+      </a>
+      <a class="nav {% if request.resolver_match.url_name == 'history' %}active{% endif %}" href="{% url 'history' %}">
+        <span>📁</span> Previous Scans
+      </a>
+      <a class="nav {% if request.resolver_match.url_name == 'medicines' or request.resolver_match.url_name == 'medicine_detail' %}active{% endif %}" href="{% url 'medicines' %}">
+        <span>💊</span> Medicine Database
+      </a>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="userbox">
+      <strong>{{ user.first_name|default:user.username }}</strong>
+      <span class="userbox-role">Active User</span>
+      
+      <div class="userbox-actions">
+        <button class="theme-toggle-btn" type="button">🌙 Dark mode</button>
+        <form method="post" action="{% url 'logout' %}" style="margin:0">
+          {% csrf_token %}
+          <button class="logout-btn" type="submit">Log out</button>
+        </form>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    {% for m in messages %}
+      <div class="notice info" role="status">{{ m }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% else %}
+  {% block auth %}{% endblock %}
+{% endif %}
+
+<script src="{% static 'scanner/js/app.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
